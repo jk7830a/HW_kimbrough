@@ -6,4 +6,3 @@ mean_value <- mean(random_numbers)
 
 #Compute the Standard Deviation
 sd_value <- sd(random_numbers)
-
