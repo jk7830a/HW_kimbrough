@@ -126,3 +126,18 @@ for(n in sample_sizes){
 
 #_____________________________________________________
 
+#Problem 3: 
+## Use and show R coding to calculate the "standard deviation"
+## for each variable of the data table mtcars using
+## the "Special For Loop Method".
+
+data("mtcars") 
+mtcars 
+
+output <- vector("double", ncol(mtcars))
+for(i in seq_along(mtcars)){
+  output[[i]] <- sd(mtcars[[i]])
+}
+names(output) <- colnames(mtcars)
+
+output
