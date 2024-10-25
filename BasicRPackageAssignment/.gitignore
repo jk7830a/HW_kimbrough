@@ -1,0 +1,16 @@
+# Ignore R package files
+*.Rhistory
+*.RData
+.Rproj.user/
+*.Rproj
+
+# Ignore compiled files
+*.o
+*.so
+
+# Ignore logs and temp files
+*.log
+*.tmp
+
+# Ignore the entire forloops package directory
+forloops/
