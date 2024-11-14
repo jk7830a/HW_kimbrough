@@ -1,0 +1,180 @@
+---
+title: "J.Kimbrough_DATA-413_WebscrapingHW"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-11-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading Libraries
+
+```{r}
+library(rvest)
+library(dplyr)
+library(tidyverse)
+```
+
+## establishing html
+
+```{r}
+#establishing html
+html <- read_html("https://www.american.edu/cas/mathstat/faculty/index.cfm#all-math-fac")
+html
+```
+
+# ---Web Scraping---
+
+## scraping the full-time faculty & staff NAMES
+
+```{r}
+# scraping the full-time faculty & staff NAMES
+staff_names <- html %>% html_nodes(".profile-name span") %>%
+  html_text()
+staff_names
+```
+
+
+## scraping the full-time faculty & staff POSITIONS
+
+```{r}
+# scraping the full-time faculty & staff POSITIONS
+staff_positions <- html %>% html_nodes("span+ small") %>% html_text()
+staff_positions
+```
+
+
+## scraping the full-time faculty & staff EMAILS (if given)
+
+```{r}
+# scraping the full-time faculty & staff EMAILS (if given)
+## one staff member listed does NOT have an email
+staff_email_raw <- html %>% html_nodes(".profile-email span") %>% html_text()
+staff_email_raw
+```
+
+
+## scraping the full-time faculty & staff PHONE #s (if given)
+
+```{r}
+# scraping the full-time faculty & staff PHONE #s (if given)
+## every staff member listed does NOT have a number
+staff_phone_raw <- html %>% html_nodes(".profile-phone span") %>% html_text()
+staff_phone_raw
+```
+
+
+# ---Cleaning Data---
+
+## staff member with NO email
+
+```{r}
+# staff member with NO email
+no_email_staff <- c("Nimai Mehta")
+```
+
+
+## staff members with NO phone number
+
+```{r}
+# distinguishing which staff member did NOT have a number
+no_phone_staff <- c("Zois Boukouvalas", 
+                         "Andrea Correll", 
+                         "James Dickens", 
+                         "David Gerard", 
+                         "William Howell", 
+                         "Zeynep Kacar", 
+                         "Chris Mitchell", 
+                         "Rebecca Steiner", 
+                         "Zeying Wang", 
+                         "Whiting Wicker")
+```
+
+
+## empty vectors for emails and phone numbers
+
+```{r}
+# initialize empty vector to store all emails
+## keeps the same length as `staff_names`
+staff_email <- vector("character", length(staff_names))
+
+
+# initialize empty vector to store all phone numbers
+## keeps the same length as `staff_names`
+staff_phone <- vector("character", length(staff_names))
+```
+
+
+## for loop for emails
+
+```{r}
+# assigns NA or the correct email to each staff/faculty
+email_index <- 1 #(to track the current position in the `staff_email_raw` list)
+for (i in seq_along(staff_names)) {
+  if (staff_names[i] %in% no_email_staff) 
+    {
+    # (will set email to NA if the staff/faculty is in the `no_email_staff` list)
+    staff_email[i] <- NA
+    } else {
+    # (assign the next available email from the list)
+    staff_email[i] <- staff_email_raw[email_index]
+    email_index <- email_index + 1  # (moves to the next email)
+    }
+}
+```
+
+
+## for loop for phone numbers
+
+```{r}
+# loop over each name to assign phone numbers correctly
+phone_index <- 1  # (tracks the current position in the `staff_phone_raw` list)
+for (i in seq_along(staff_names)) {
+  if (staff_names[i] %in% no_phone_staff) 
+    {
+    # (will set phone # to NA for staff/faculty without a phone number in the `no_phone_staff` list)
+    staff_phone[i] <- NA
+    } else {
+    # (assigns the next available phone number [hopefully keeping the right order])
+    staff_phone[i] <- staff_phone_raw[phone_index]
+    phone_index <- phone_index + 1  # (moves to the next phone number)
+    }
+}
+
+```
+
+
+# ---Creating Data & CSV---
+
+## create the final data frame
+
+```{r}
+# create the final data frame
+au_math_stat_dep_staff <- data.frame(
+  staff_names,
+  staff_positions,
+  staff_email,
+  staff_phone,
+  stringsAsFactors = FALSE #(will keep my data as characters rather than make them factors)
+)
+```
+
+
+## view the data before making it csv
+
+```{r}
+# view the data before making it csv [making sure it's right like on the html page]
+view(au_math_stat_dep_staff)
+```
+
+
+## make the csv
+
+```{r}
+# make the csv
+write.csv(au_math_stat_dep_staff, "J.Kimbrough_DATA-413_AUMathDepartmentFaculty.csv")
+```
+
